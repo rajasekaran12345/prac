@@ -1,0 +1,46 @@
+import numpy as np
+
+def sigmoid(x): return 1/(1+np.exp(-x))
+def sigmoid_deriv(x): return x*(1-x)
+
+class SimpleNN:
+    def __init__(self, n_input, n_hidden, n_output, lr=0.5):
+        self.lr = lr
+        self.W1 = np.random.randn(n_input, n_hidden) * 0.5
+        self.b1 = np.zeros(n_hidden)
+        self.W2 = np.random.randn(n_hidden, n_output) * 0.5
+        self.b2 = np.zeros(n_output)
+
+    def forward(self, X):
+        z1 = X.dot(self.W1) + self.b1
+        a1 = sigmoid(z1)
+        z2 = a1.dot(self.W2) + self.b2
+        a2 = sigmoid(z2)
+        return a1, a2
+
+    def train(self, X, y, epochs=1000):
+        for _ in range(epochs):
+            a1, a2 = self.forward(X)
+            error = a2 - y
+            d2 = error * sigmoid_deriv(a2)
+            dW2 = a1.T.dot(d2)
+            db2 = d2.sum(axis=0)
+            d1 = d2.dot(self.W2.T) * sigmoid_deriv(a1)
+            dW1 = X.T.dot(d1)
+            db1 = d1.sum(axis=0)
+            self.W2 -= self.lr * dW2
+            self.b2 -= self.lr * db2
+            self.W1 -= self.lr * dW1
+            self.b1 -= self.lr * db1
+
+    def predict(self, X):
+        _, a2 = self.forward(X)
+        return (a2 >= 0.5).astype(int)
+
+if __name__ == "__main__":
+    X = np.array([[0,0],[0,1],[1,0],[1,1]], dtype=float)
+    y = np.array([[0],[1],[1],[1]], dtype=float)
+    nn = SimpleNN(2, 3, 1, lr=0.5)
+    nn.train(X, y, epochs=5000)
+    print("Predictions:", nn.predict(X).flatten())
+    print("True:", y.flatten())
