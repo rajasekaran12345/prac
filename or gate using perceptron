@@ -1,0 +1,28 @@
+import numpy as np
+
+class Perceptron:
+    def __init__(self, n_inputs, lr=0.1):
+        self.w = np.zeros(n_inputs+1)  # +1 for bias
+        self.lr = lr
+
+    def predict(self, x):
+        x_with_bias = np.append(x, 1)
+        return 1 if np.dot(self.w, x_with_bias) >= 0 else 0
+
+    def train(self, X, y, epochs=10):
+        for _ in range(epochs):
+            for xi, yi in zip(X, y):
+                pred = self.predict(xi)
+                error = yi - pred
+                if error != 0:
+                    self.w[:-1] += self.lr * error * xi
+                    self.w[-1] += self.lr * error  # bias
+
+if __name__ == "__main__":
+    X = np.array([[0,0],[0,1],[1,0],[1,1]])
+    y = np.array([0,1,1,1])  # OR gate
+    p = Perceptron(n_inputs=2, lr=0.2)
+    p.train(X, y, epochs=10)
+    print("Weights:", p.w)
+    for x in X:
+        print(x, "->", p.predict(x))
