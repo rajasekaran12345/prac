@@ -1,0 +1,45 @@
+import numpy as np
+
+def sigmoid(x): return 1/(1+np.exp(-x))
+def sigmoid_deriv(x): return x*(1-x)
+
+pattern_A = np.array([
+    [1,1,1,1, 1,0,0,1, 1,0,0,1, 1,1,1,1],
+    [1,1,1,1, 1,1,0,1, 1,0,1,1, 1,1,1,1]
+], dtype=float)
+
+pattern_B = np.array([
+    [0,1,1,0, 1,0,0,1, 1,0,0,1, 0,1,1,0],
+    [0,1,1,0, 1,1,1,1, 1,1,1,1, 0,1,1,0]
+], dtype=float)
+
+X = np.vstack([pattern_A, pattern_B])
+y = np.array([[1],[1],[0],[0]], dtype=float)
+
+W1 = np.random.randn(16,6)*0.5
+b1 = np.zeros(6)
+W2 = np.random.randn(6,1)*0.5
+b2 = np.zeros(1)
+lr = 0.5
+
+for epoch in range(2000):
+    z1 = X.dot(W1) + b1
+    a1 = sigmoid(z1)
+    z2 = a1.dot(W2) + b2
+    a2 = sigmoid(z2)
+
+    error = a2 - y
+    d2 = error * sigmoid_deriv(a2)
+    dW2 = a1.T.dot(d2)
+    db2 = d2.sum(axis=0)
+    d1 = d2.dot(W2.T) * sigmoid_deriv(a1)
+    dW1 = X.T.dot(d1)
+    db1 = d1.sum(axis=0)
+
+    W2 -= lr * dW2
+    b2 -= lr * db2
+    W1 -= lr * dW1
+    b1 -= lr * db1
+
+print("Outputs:", a2.flatten())
+print("Predictions:", (a2>=0.5).astype(int).flatten())
