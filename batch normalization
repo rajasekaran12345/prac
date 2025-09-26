@@ -1,0 +1,40 @@
+import tensorflow as tf
+import numpy as np
+
+# Dataset
+X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]], dtype=float)
+y = np.array([[0], [1], [1], [1]], dtype=float)
+
+def build_and_train_model(lr=0.5, epochs=2000):
+    # Build the model with BatchNorm + ReLU
+    model = tf.keras.Sequential([
+        tf.keras.layers.Input(shape=(2,)),
+        tf.keras.layers.Dense(3, use_bias=True),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.ReLU(),
+        tf.keras.layers.Dense(1, activation='sigmoid')
+    ])
+
+    # Compile with SGD to match manual gradient descent
+    model.compile(
+        optimizer=tf.keras.optimizers.SGD(learning_rate=lr),
+        loss='binary_crossentropy',
+        metrics=['accuracy']
+    )
+
+    # Train the model
+    model.fit(X, y, epochs=epochs, verbose=0)
+
+    # Evaluate final accuracy
+    loss, acc = model.evaluate(X, y, verbose=0)
+    return acc, model
+
+if __name__ == "__main__":
+    acc, model = build_and_train_model(lr=0.5, epochs=2000)
+    print(f"Training accuracy: {acc:.2f}")
+
+    # Show predictions
+    preds = (model.predict(X) >= 0.5).astype(int)
+    print("Predictions:")
+    for i, (inp, pred) in enumerate(zip(X, preds)):
+        print(f"{inp} -> {pred[0]}")
